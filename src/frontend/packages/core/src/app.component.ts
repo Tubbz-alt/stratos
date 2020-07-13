@@ -68,6 +68,7 @@ export class AppComponent implements OnInit, OnDestroy, AfterContentInit {
     if (isDesktop) {
       this.document.body.classList.add('mat-desktop');
     }
+
   }
 
   ngOnDestroy() {

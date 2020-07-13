@@ -16,7 +16,6 @@ import (
 	"github.com/labstack/echo"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
-	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/tokens"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/stringutils"
 )
 
@@ -28,6 +27,14 @@ type uaaAuth struct {
 	databaseConnectionPool *sql.DB
 	p                      *portalProxy
 	skipSSLValidation      bool
+}
+
+func (a *uaaAuth) ShowConfig(config *interfaces.ConsoleConfig) {
+	log.Infof("... UAA Endpoint            : %s", config.UAAEndpoint)
+	log.Infof("... Authorization Endpoint  : %s", config.AuthorizationEndpoint)
+	log.Infof("... Console Client          : %s", config.ConsoleClient)
+	log.Infof("... Admin Scope             : %s", config.ConsoleAdminScope)
+	log.Infof("... Use SSO Login           : %t", config.UseSSO)
 }
 
 //Login provides UAA-auth specific Stratos login
@@ -113,6 +120,8 @@ func (a *uaaAuth) GetUser(userGUID string) (*interfaces.ConnectedUser, error) {
 	return uaaEntry, nil
 
 }
+
+func (a *uaaAuth) BeforeVerifySession(c echo.Context) {}
 
 //VerifySession verifies the session the specified UAA user and refreshes the token if necessary
 func (a *uaaAuth) VerifySession(c echo.Context, sessionUser string, sessionExpireTime int64) error {
@@ -268,7 +277,7 @@ func (p *portalProxy) saveAuthToken(u interfaces.JWTUserTokenInfo, authTok strin
 func (p *portalProxy) setUAATokenRecord(key string, t interfaces.TokenRecord) error {
 	log.Debug("setUAATokenRecord")
 
-	tokenRepo, err := tokens.NewPgsqlTokenRepository(p.DatabaseConnectionPool)
+	tokenRepo, err := p.GetStoreFactory().TokenStore()
 	if err != nil {
 		return fmt.Errorf("Database error getting repo for UAA token: %v", err)
 	}
@@ -384,7 +393,7 @@ func (p *portalProxy) getUAAToken(body url.Values, skipSSLValidation bool, clien
 func (p *portalProxy) GetUAATokenRecord(userGUID string) (interfaces.TokenRecord, error) {
 	log.Debug("GetUAATokenRecord")
 
-	tokenRepo, err := tokens.NewPgsqlTokenRepository(p.DatabaseConnectionPool)
+	tokenRepo, err := p.GetStoreFactory().TokenStore()
 	if err != nil {
 		log.Errorf("Database error getting repo for UAA token: %v", err)
 		return interfaces.TokenRecord{}, err
@@ -463,7 +472,6 @@ func (p *portalProxy) ssoLoginToUAA(c echo.Context) error {
 		state = fmt.Sprintf("%s/login?SSO_Message=%s", state, url.QueryEscape(msg))
 	}
 
-
 	return c.Redirect(http.StatusTemporaryRedirect, state)
 }
 
@@ -535,7 +543,7 @@ func validateSSORedirectState(state string, whiteListStr string) error {
 			"SSO Login: State parameter missing")
 		return err
 	}
-	if !safeSSORedirectState(state,whiteListStr) {
+	if !safeSSORedirectState(state, whiteListStr) {
 		err := interfaces.NewHTTPShadowError(
 			http.StatusUnauthorized,
 			"SSO Login: Disallowed redirect state",

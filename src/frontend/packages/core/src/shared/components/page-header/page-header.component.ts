@@ -6,7 +6,6 @@ import * as moment from 'moment';
 import { Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
-import { Logout } from '../../../../../store/src/actions/auth.actions';
 import { ToggleSideNav } from '../../../../../store/src/actions/dashboard-actions';
 import { AddRecentlyVisitedEntityAction } from '../../../../../store/src/actions/recently-visited.actions';
 import { AppState } from '../../../../../store/src/app-state';
@@ -22,6 +21,7 @@ import { IPageSideNavTab } from '../../../features/dashboard/page-side-nav/page-
 import { GlobalEventService, IGlobalEvent } from '../../global-events.service';
 import { selectDashboardState } from './../../../../../store/src/selectors/dashboard.selectors';
 import { UserProfileInfo } from './../../../../../store/src/types/user-profile.types';
+import { environment } from './../../../environments/environment.prod';
 import { BREADCRUMB_URL_PARAM, IHeaderBreadcrumb, IHeaderBreadcrumbLink } from './page-header.types';
 
 @Component({
@@ -37,6 +37,8 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   private pTabs: IPageSideNavTab[];
 
   public isMobile$: Observable<boolean> = this.store.select(selectIsMobile);
+
+  public environment = environment;
 
   @ViewChild('pageHeaderTmpl', { static: true }) pageHeaderTmpl: TemplateRef<any>;
 
@@ -142,7 +144,7 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   }
 
   logout() {
-    this.store.dispatch(new Logout());
+    this.router.navigate(['/login/logout']);
   }
 
   public toggleSidenav() {

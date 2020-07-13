@@ -37,6 +37,7 @@ import (
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/crypto"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/datastore"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/factory"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/cnsis"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/console_config"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
@@ -261,6 +262,10 @@ func main() {
 	// Setup the global interface for the proxy
 	portalProxy := newPortalProxy(portalConfig, databaseConnectionPool, sessionStore, sessionStoreOptions, envLookup)
 	portalProxy.SessionDataStore = sessionDataStore
+
+	store := factory.NewDefaultStoreFactory(databaseConnectionPool)
+	portalProxy.SetStoreFactory(store)
+
 	log.Info("Initialization complete.")
 
 	c := make(chan os.Signal, 2)
@@ -342,7 +347,7 @@ func main() {
 		log.Info("Console does not have a complete configuration - going to enter setup mode (adding `setup` route and middleware)")
 	} else {
 		needSetupMiddleware = false
-		showStratosConfig(portalProxy.Config.ConsoleConfig)
+		showStratosConfig(portalProxy, portalProxy.Config.ConsoleConfig)
 		showSSOConfig(portalProxy)
 	}
 
@@ -410,21 +415,13 @@ func initialiseConsoleConfiguration(portalProxy *portalProxy) error {
 	return nil
 }
 
-func showStratosConfig(config *interfaces.ConsoleConfig) {
+func showStratosConfig(portalProxy *portalProxy, config *interfaces.ConsoleConfig) {
 	log.Infof("Stratos is initialized with the following setup:")
 	log.Infof("... Auth Endpoint Type      : %s", config.AuthEndpointType)
-	if val, found := interfaces.AuthEndpointTypes[config.AuthEndpointType]; found {
-		if val == interfaces.Local {
-			log.Infof("... Local User              : %s", config.LocalUser)
-			log.Infof("... Local User Scope        : %s", config.LocalUserScope)
-		} else { //Auth type is set to remote
-			log.Infof("... UAA Endpoint            : %s", config.UAAEndpoint)
-			log.Infof("... Authorization Endpoint  : %s", config.AuthorizationEndpoint)
-			log.Infof("... Console Client          : %s", config.ConsoleClient)
-			log.Infof("... Admin Scope             : %s", config.ConsoleAdminScope)
-			log.Infof("... Use SSO Login           : %t", config.UseSSO)
-		}
-	}
+
+	// Ask the auto provider to display their config
+	portalProxy.StratosAuthService.ShowConfig(config)
+
 	log.Infof("... Skip SSL Validation     : %t", config.SkipSSLValidation)
 	log.Infof("... Setup Complete          : %t", config.IsSetupComplete())
 }
@@ -577,7 +574,7 @@ func loadPortalConfig(pc interfaces.PortalConfig, env *env.VarSet) (interfaces.P
 		if endpointTypeSupported {
 			pc.AuthEndpointType = string(val)
 		} else {
-			return pc, fmt.Errorf("AUTH_ENDPOINT_TYPE: %v is not valid. Must be set to local or remote (defaults to remote)", val)
+			return pc, fmt.Errorf("AUTH_ENDPOINT_TYPE: '%v' is not valid. Must be set to local or remote (defaults to remote)", pc.AuthEndpointType)
 		}
 	}
 
@@ -863,6 +860,13 @@ func (p *portalProxy) getHttpClient(skipSSLValidation bool, mutating bool) http.
 	return client
 }
 
+func debugLogging(h echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		log.Debugf("==>> REQUEST: %s %s", c.Request().Method, c.Request().URL)
+		return h(c)
+	}
+}
+
 func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 	log.Debug("registerRoutes")
 
@@ -887,6 +891,12 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 		e.Use(p.SetupMiddleware())
 		pp.POST("/v1/setup/check", p.setupGetAvailableScopes)
 		pp.POST("/v1/setup/save", p.setupSaveConfig)
+	}
+
+	// Debug logging of the request URL
+	if strings.ToLower(p.GetConfig().LogLevel) == "debug" {
+		log.Info("Adding debug logging")
+		e.Use(debugLogging)
 	}
 
 	loginAuthGroup := pp.Group("/v1/auth")
@@ -1114,4 +1124,14 @@ func stopEchoWhenUpgraded(e *echo.Echo, env *env.VarSet) {
 	}
 	log.Info("Upgrade has completed! Shutting down Upgrade web server instance")
 	e.Close()
+}
+
+// GetStoreFactory gets the store factory
+func (portalProxy *portalProxy) GetStoreFactory() interfaces.StoreFactory {
+	return factory.GetStoreFactory()
+}
+
+// SetStoreFactory sets the store factory
+func (portalProxy *portalProxy) SetStoreFactory(f interfaces.StoreFactory) interfaces.StoreFactory {
+	return factory.SetStoreFactory(f)
 }

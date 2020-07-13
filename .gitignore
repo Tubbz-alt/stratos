@@ -121,3 +121,10 @@ stratos-frontend-prebuild.zip
 src/frontend/assets
 src/frontend/sass
 go-vendor-*.tgz
+
+# Desktop app using Electron
+/electron/dist
+/electron/node_modules
+/electron/out
+/electron/dev-ssl
+/electron/jetstream
