@@ -18,6 +18,7 @@ import (
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/kubernetes/auth"
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/kubernetes/terminal"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/kubernetes/desktop"
 )
 
 // KubernetesSpecification is the endpoint that adds Kubernetes support to the backend
@@ -152,6 +153,9 @@ func (c *KubernetesSpecification) Init() error {
 	if c.kubeTerminal != nil {
 		c.kubeTerminal.StartCleanup()
 	}
+
+	// Initialize the desktop integration
+	desktop.Init(c.portalProxy)
 
 	return nil
 }

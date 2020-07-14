@@ -8,6 +8,7 @@ import (
 
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces/config"
 
+	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
 )
 
@@ -144,6 +145,9 @@ func (k *KubeConfigFile) GetUserForCluster(clusterEndpoint string) (*KubeConfigU
 }
 
 func ParseKubeConfig(kubeConfigData []byte) (*KubeConfigFile, error) {
+
+	log.Info("ParseKubeConfig")
+	log.Infof("%s", string(kubeConfigData))
 
 	kubeConfig := &KubeConfigFile{}
 	err := yaml.Unmarshal(kubeConfigData, &kubeConfig)
