@@ -101,15 +101,16 @@ function doCreateWindow(url) {
     // showInspectElement: false
   });
 
-  const menu = Menu.buildFromTemplate(mainMenu(mainWindow));
-  Menu.setApplicationMenu(menu)
-
   // Load the UI from the dev version beign served by `ng serve`
   if (isDev()) {
     url = '127.0.0.1:4200'
   }
+  url = `https://${url}`
 
-  mainWindow.loadURL(`https://${url}`);
+  const menu = Menu.buildFromTemplate(mainMenu(mainWindow, url));
+  Menu.setApplicationMenu(menu)
+
+  mainWindow.loadURL(url);
 
   // Open the DevTools.
   //mainWindow.webContents.openDevTools({mode:'undocked'});
@@ -150,7 +151,7 @@ function getEnvironment(url) {
     'SQLITE_KEEP_DB': 'true',
     'SQLITE_DB_DIR': getConfigFolder(),
     //'LOG_LEVEL': 'DEBUG',
-    'SESSION_STORE_EXPIRY': Number.MAX_SAFE_INTEGER
+    'SESSION_STORE_EXPIRY': 50000000
   };
 }
 
