@@ -4,6 +4,7 @@ import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
+import { NgxElectronModule } from 'ngx-electron';
 
 import { InternalEventMonitorFactory } from '../../../store/src/monitors/internal-event-monitor.factory';
 import { CoreModule } from '../core/core.module';
@@ -130,6 +131,7 @@ import { UserPermissionDirective } from './user-permission.directive';
     SteppersModule,
     CdkTableModule,
     NgxChartsModule,
+    NgxElectronModule
   ],
   declarations: [
     LoadingPageComponent,
