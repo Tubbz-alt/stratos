@@ -86,7 +86,14 @@ export function StratosAction(props: StratosActionMetadata) {
 }
 
 export function StratosLoginComponent() {
-  return target => extensionMetadata.loginComponent = target;
+  return target => {
+    // TODO: RC HACK
+    if (extensionMetadata.loginComponent) {
+      console.warn('Ignoring log in component, one has already been set')
+    } else {
+      extensionMetadata.loginComponent = target
+    }
+  };
 }
 
 function addExtensionTab(tab: StratosTabType, target: any, props: StratosTabMetadataConfig) {
