@@ -37,6 +37,7 @@
       "@stratosui/cf-autoscaler": ["frontend/packages/cf-autoscaler/src/public_api.ts"],
       "@example/extensions": ["frontend/packages/example-extensions/src/public-api.ts"],
       "@susestratos/extensions": ["frontend/packages/suse-extensions/src/public-api.ts"],
+      "@stratosui/desktop-extensions": ["frontend/packages/desktop-extensions/src/public-api.ts"],
     }
   }
 }

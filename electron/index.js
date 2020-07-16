@@ -1,19 +1,41 @@
-
-const {app, BrowserWindow, Menu, shell, dialog} = require('electron')
+const {
+  app,
+  BrowserWindow,
+  Menu,
+  shell,
+  dialog,
+  nativeTheme,
+  Notification,
+  ipcMain
+} = require('electron')
 const url = require("url");
 const path = require("path");
 const https = require('https');
 
 const findFreePort = require("./freeport");
-const { exec, spawn } = require('child_process');
+const {
+  exec,
+  spawn
+} = require('child_process');
 const contextMenu = require('electron-context-menu');
 const mainMenu = require('./menu');
 const homeDir = require('os').homedir();
 const fs = require('fs-extra');
 const windowStateKeeper = require('electron-window-state');
-const { escapeRegExp } = require('lodash');
+const {
+  escapeRegExp
+} = require('lodash');
 
 //const LOG_FILE = '/Users/nwm/stratos.log';
+const icon = path.join(__dirname, '/icon.png');
+
+const ELECTRON_NOTIFICATION = 'ELECTRON_NOTIFICATION';
+// See node_modules/electron/electron.d.ts NotificationConstructorOptions
+const standardNotificationSettings = {
+  title: 'Stratos',
+  silent: false,
+  icon,
+};
 
 let mainWindow;
 let jetstream;
@@ -32,22 +54,27 @@ function addContextMenu(mainWindow) {
 
   mainWindow.addEventListener('contextmenu', (e) => {
     e.preventDefault()
-    rightClickPosition = {x: e.x, y: e.y}
+    rightClickPosition = {
+      x: e.x,
+      y: e.y
+    }
     menu.popup(remote.getCurrentWindow())
   }, false);
 }
 
-function createWindow () {
+function createWindow() {
 
   // fs.writeFileSync(LOG_FILE, 'STRATOS\n');
   // fs.appendFileSync(LOG_FILE, __dirname);
 
-  findFreePort(30000, 40000, '127.0.0.1', function(err, port) {
+  findFreePort(30000, 40000, '127.0.0.1', function (err, port) {
     let url = `127.0.0.1:${port}`;
     const prog = path.join(__dirname, `./jetstream`);
-    jetstream = spawn(prog, [], { env: getEnvironment(url),
-      cwd: __dirname, 
-      stdio: 'inherit'});
+    jetstream = spawn(prog, [], {
+      env: getEnvironment(url),
+      cwd: __dirname,
+      stdio: 'inherit'
+    });
 
     waitForBackend(`https://${url}`, () => {
       doCreateWindow(url);
@@ -67,10 +94,11 @@ function doCreateWindow(url) {
     y: mainWindowState.y,
     width: mainWindowState.width,
     height: mainWindowState.height,
-    title: 'Stratos',
+    // title: 'Stratos', // Set automatically by html title
     webPreferences: {
       nodeIntegration: true
-    }
+    },
+    icon,
   });
   // Remember last position and size
   mainWindowState.manage(mainWindow);
@@ -86,15 +114,24 @@ function doCreateWindow(url) {
     // showInspectElement: false
   });
 
-  const menu = Menu.buildFromTemplate(mainMenu(mainWindow));
-  Menu.setApplicationMenu(menu)
-
   // Load the UI from the dev version beign served by `ng serve`
   if (isDev()) {
     url = '127.0.0.1:4200'
   }
+  url = `https://${url}`
 
-  mainWindow.loadURL(`https://${url}`);
+  const menu = Menu.buildFromTemplate(mainMenu(mainWindow, url));
+  Menu.setApplicationMenu(menu)
+
+  mainWindow.loadURL(url);
+
+  ipcMain.on(ELECTRON_NOTIFICATION, (event, args) => {
+    new Notification({
+      ...standardNotificationSettings,
+      title: 'Stratos',
+      body: args.message,
+    }).show()
+  })
 
   // Open the DevTools.
   //mainWindow.webContents.openDevTools({mode:'undocked'});
@@ -114,7 +151,7 @@ app.on('activate', function () {
 
 app.on('certificate-error', (event, webContents, url, error, certificate, callback) => {
 
-  if (url.indexOf('https://127.0.0.1') === 0 || url.indexOf('wss://127.0.0.1') === 0)  {
+  if (url.indexOf('https://127.0.0.1') === 0 || url.indexOf('wss://127.0.0.1') === 0) {
     // Verification logic.
     event.preventDefault()
     callback(true)
@@ -130,11 +167,12 @@ function getConfigFolder() {
 }
 
 function getEnvironment(url) {
-  return  {
+  return {
     'CONSOLE_PROXY_TLS_ADDRESS': url,
     'SQLITE_KEEP_DB': 'true',
     'SQLITE_DB_DIR': getConfigFolder(),
     //'LOG_LEVEL': 'DEBUG',
+    'SESSION_STORE_EXPIRY': 50000000
   };
 }
 
