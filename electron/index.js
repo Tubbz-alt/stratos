@@ -11,6 +11,7 @@ const {
 const url = require("url");
 const path = require("path");
 const https = require('https');
+const chokidar = require('chokidar');
 
 const findFreePort = require("./freeport");
 const {
@@ -22,9 +23,9 @@ const mainMenu = require('./menu');
 const homeDir = require('os').homedir();
 const fs = require('fs-extra');
 const windowStateKeeper = require('electron-window-state');
-const {
-  escapeRegExp
-} = require('lodash');
+// const {
+//   escapeRegExp
+// } = require('lodash');
 
 //const LOG_FILE = '/Users/nwm/stratos.log';
 const icon = path.join(__dirname, '/icon.png');
@@ -135,6 +136,12 @@ function doCreateWindow(url) {
 
   // Open the DevTools.
   //mainWindow.webContents.openDevTools({mode:'undocked'});
+
+  // Watch for the helm repository file to change
+  const watcher = chokidar.watch(getHelmRepoFolder());
+  watcher.on('all', () => {
+    mainWindow.webContents.send('endpointsChanged', 'HELM');
+  });
 }
 
 app.on('ready', createWindow)
@@ -210,5 +217,12 @@ function jetstreamDidNotStart(url, done, retry) {
   } else {
     setTimeout(() => waitForBackend(url, done, retry), 50);
   }
+}
 
+function getHelmRepoFolder() {
+  var isMac = process.platform === "darwin";
+  if (isMac) {
+    return path.join(homeDir, 'Library', 'Preferences', 'helm');
+  }
+  return path.join(homeDir, '.config', 'helm');
 }

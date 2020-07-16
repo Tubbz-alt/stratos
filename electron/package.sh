@@ -11,7 +11,7 @@ popd > /dev/null
 
 pushd ${STRATOS} > /dev/null
 rm -rf dist
-ng build
+ng build --configuration=desktop
 npm run build-backend
 cp ./src/jetstream/jetstream ./electron
 cp -R ${STRATOS}/dist ${DIR}
@@ -24,3 +24,8 @@ rm -rf dist/*es5*
 popd > /dev/null
 
 npm run package
+
+# Mac - move the app to the Applications folder
+if [ "$1" == "-i" ]; then
+  mv ./out/Stratos-darwin-x64/Stratos.app /Applications
+fi
