@@ -102,7 +102,6 @@ func getKubeConfigUser(config *clientcmdapi.Config, endpoint *interfaces.CNSIRec
 		if context.Cluster == endpoint.Name {
 			auth := config.AuthInfos[context.AuthInfo]
 			if auth != nil {
-				log.Infof(">>>> FOUND Cluster for endpoint: %s, %s", endpoint, name)
 				return auth, true
 			}
 		}

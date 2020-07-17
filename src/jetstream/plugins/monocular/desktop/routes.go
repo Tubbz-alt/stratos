@@ -18,6 +18,9 @@ func RegisterRoutes(echoGroup *echo.Group) {
 	// echoGroup.POST("/chartrepos/status", m.GetRepoStatuses)
 	// echoGroup.POST("/chartrepos/:guid", m.SyncRepo)
 
+	// Get specific chart version file (used for values.yaml)
+	echoGroup.GET("/chartsvc/v1/assets/:repo/:name/versions/:version/:filename", getChartAndVersionFile)
+
 	// Get specific chart version file
 	echoGroup.GET("/chartsvc/v1/charts/:repo/:name/versions/:version/files/:filename", getChartAndVersionFile)
 

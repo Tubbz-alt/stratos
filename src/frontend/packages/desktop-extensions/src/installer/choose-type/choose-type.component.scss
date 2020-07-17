@@ -3,6 +3,7 @@
   display: flex;
   justify-content: center;
   flex-direction: column;
+  width: 100%;
 
   mat-card {
     min-width: 600px;
@@ -22,7 +23,7 @@
     .icon {
       flex: 0;
       padding-right: 25px;
-      display: flex;
+      // display: flex;
       align-items: center;
       justify-content: center;
       div {

@@ -367,6 +367,7 @@ func getChartVersion(indexData IndexFileMetadata) chartVersion {
 		//Description: chart.Description,
 		Created: indexData.Created,
 		Readme:  fmt.Sprintf("/v1/charts/%s/%s/versions/%s/files/README.md", indexData.Repo.Name, indexData.Name, indexData.Version),
+		Values:  fmt.Sprintf("/v1/charts/%s/%s/versions/%s/files/values.yaml", indexData.Repo.Name, indexData.Name, indexData.Version),
 		URLs:    indexData.URLs,
 	}
 }
