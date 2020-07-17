@@ -37,7 +37,7 @@
     "forge": {
       "packagerConfig": {
         "dir": ".",
-        "icon": "./icon.icns"
+        "icon": "icon.icns"
       },
       "makers": [
         {
