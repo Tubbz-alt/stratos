@@ -13,7 +13,7 @@ const path = require("path");
 const https = require('https');
 const chokidar = require('chokidar');
 
-const Store = require('./store.js');
+const ElectronStore = require('./electron-store.js');
 
 const findFreePort = require("./freeport");
 const {
@@ -51,7 +51,7 @@ let mainWindow;
 let jetstream;
 
 const lastLocation = 'lastLocation';
-const store = new Store({
+const store = new ElectronStore({
   configName: 'settings',
   defaults: {
     [lastLocation]: ''
@@ -137,7 +137,7 @@ function doCreateWindow(url) {
 
   // Load the UI from the dev version beign served by `ng serve`
   if (isDev()) {
-    url = '127.0.0.1:4200'
+    url = '127.0.0.1:4500'
   }
   url = `https://${url}`
   url = addPath(url);
