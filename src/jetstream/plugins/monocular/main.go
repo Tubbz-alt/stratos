@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/monocular/desktop"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	"github.com/labstack/echo"
 	log "github.com/sirupsen/logrus"
@@ -30,6 +31,8 @@ const (
 	localDevEnvVar        = "FDB_LOCAL_DEV"
 	chartSyncBasePort     = 45000
 )
+
+var deskTopMode = true
 
 // Monocular is a plugin for Monocular
 type Monocular struct {
@@ -54,6 +57,12 @@ func (m *Monocular) GetChartStore() *chartsvc.ChartSvcDatastore {
 // Init performs plugin initialization
 func (m *Monocular) Init() error {
 	log.Debug("Monocular init .... ")
+
+	if deskTopMode {
+		desktop.Init(m.portalProxy)
+		return nil
+	}
+
 	if err := m.configure(); err != nil {
 		return err
 	}
@@ -224,6 +233,14 @@ func (m *Monocular) AddAdminGroupRoutes(echoGroup *echo.Group) {
 func (m *Monocular) AddSessionGroupRoutes(echoGroup *echo.Group) {
 	// API for Helm Chart Repositories
 	echoGroup.GET("/chartrepos", m.ListRepos)
+
+	// If desktop mode, then do things differently
+	if deskTopMode {
+		desktop.RegisterRoutes(echoGroup)
+		return
+	}
+
+	// Default monocular
 	echoGroup.Any("/chartsvc/*", m.handleAPI)
 	echoGroup.POST("/chartrepos/status", m.GetRepoStatuses)
 	echoGroup.POST("/chartrepos/:guid", m.SyncRepo)
