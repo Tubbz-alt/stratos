@@ -17,7 +17,8 @@
           {{type.description}}
         </div>
         <div class="button">
-          <button (click)="edit()" mat-raised-button color="primary">
+          <button (click)="edit()" mat-button mat-raised-button color="primary"
+            routerLink="/monocular/install/{{type.chart.id}}/{{type.chart.currentVersion}}">
             Install Now!
           </button>
         </div>
