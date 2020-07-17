@@ -98,7 +98,7 @@ func ListConnectedKubernetes() ([]*interfaces.ConnectedEndpoint, error) {
 func getKubeConfigUser(config *clientcmdapi.Config, endpoint *interfaces.CNSIRecord) (*clientcmdapi.AuthInfo, bool) {
 
 	// Find the first context for this endpoint
-	for name, context := range config.Contexts {
+	for _, context := range config.Contexts {
 		if context.Cluster == endpoint.Name {
 			auth := config.AuthInfos[context.AuthInfo]
 			if auth != nil {
