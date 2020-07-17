@@ -32,6 +32,11 @@ func ListCloudFoundry() ([]*interfaces.CNSIRecord, error) {
 		return nil, err
 	}
 
+	// Ignore if the api endpoint is empty
+	if len(cfg.APIEndpoint) == 0 {
+		return nil, nil
+	}
+
 	eps := make([]*interfaces.CNSIRecord, 1)
 	eps[0] = &interfaces.CNSIRecord{
 		GUID:                   getEndpointGUID(cfg.APIEndpoint),
@@ -55,6 +60,11 @@ func ListConnectedCloudFoundry() ([]*interfaces.ConnectedEndpoint, error) {
 	cfg, apiEndpoint, err := readCFFile()
 	if err != nil {
 		return nil, err
+	}
+
+	// Ignore if the api endpoint is empty
+	if len(cfg.APIEndpoint) == 0 {
+		return nil, nil
 	}
 
 	//TODO: Token expiry
@@ -95,9 +105,11 @@ func readCFFile() (*CFConfigFile, *url.URL, error) {
 		return nil, url, fmt.Errorf("Can not parse Cloud Foundry config file: %s", err)
 	}
 
-	url, err = url.Parse(config.APIEndpoint)
-	if err != nil {
-		return nil, url, err
+	if len(config.APIEndpoint) > 0 {
+		url, err = url.Parse(config.APIEndpoint)
+		if err != nil {
+			return nil, url, err
+		}
 	}
 	return config, url, nil
 }
@@ -142,4 +154,23 @@ func updateCFFIle(updates map[string]string) error {
 
 	ioutil.WriteFile(cfFile, data, stats.Mode())
 	return nil
+}
+
+func IsLocalCloudFoundry(cnsiGUID string) bool {
+	record, _ := FindLocalCloudFoundry(cnsiGUID)
+	return record != nil
+}
+
+func FindLocalCloudFoundry(cnsiGUID string) (*interfaces.CNSIRecord, error) {
+
+	local, err := ListCloudFoundry()
+	if err != nil {
+		return nil, err
+	}
+
+	if len(local) == 1 && local[0].GUID == cnsiGUID {
+		return local[0], nil
+	}
+
+	return nil, nil
 }

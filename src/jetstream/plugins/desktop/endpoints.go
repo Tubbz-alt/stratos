@@ -24,22 +24,14 @@ func (d *DesktopEndpointStore) List(encryptionKey []byte) ([]*interfaces.CNSIRec
 func (d *DesktopEndpointStore) ListByUser(userGUID string) ([]*interfaces.ConnectedEndpoint, error) {
 	local, err := ListConnectedCloudFoundry()
 	db, err := d.store.ListByUser(userGUID)
-
 	merged := mergeConnectedEndpoints(db, local)
 	return merged, err
 }
 
 func (d *DesktopEndpointStore) Find(guid string, encryptionKey []byte) (interfaces.CNSIRecord, error) {
-
-	local, err := ListCloudFoundry()
-
-	if err == nil {
-		if len(local) > 0 {
-			if local[0].GUID == guid {
-				// Got the local endpoint
-				return *local[0], nil
-			}
-		}
+	record, _ := FindLocalCloudFoundry(guid)
+	if record != nil {
+		return *record, nil
 	}
 
 	return d.store.Find(guid, encryptionKey)
@@ -50,6 +42,11 @@ func (d *DesktopEndpointStore) FindByAPIEndpoint(endpoint string, encryptionKey 
 }
 
 func (d *DesktopEndpointStore) Delete(guid string) error {
+	if IsLocalCloudFoundry(guid) {
+		updates := make(map[string]string)
+		updates["Target"] = ""
+		return updateCFFIle(updates)
+	}
 	return d.store.Delete(guid)
 }
 
@@ -71,6 +68,15 @@ func (d *DesktopEndpointStore) SaveOrUpdate(endpoint interfaces.CNSIRecord, encr
 
 // Merge endpoints, over-riding any in first with those in second
 func mergeEndpoints(first, second []*interfaces.CNSIRecord) []*interfaces.CNSIRecord {
+
+	if first == nil {
+		return second
+	}
+
+	if second == nil {
+		return first
+	}
+
 	urls := make(map[string]bool, 0)
 	for _, endpoint := range second {
 		urls[endpoint.APIEndpoint.String()] = true
@@ -92,6 +98,15 @@ func mergeEndpoints(first, second []*interfaces.CNSIRecord) []*interfaces.CNSIRe
 
 // Merge endpoints, over-riding any in first with those in second
 func mergeConnectedEndpoints(first, second []*interfaces.ConnectedEndpoint) []*interfaces.ConnectedEndpoint {
+
+	if first == nil {
+		return second
+	}
+
+	if second == nil {
+		return first
+	}
+
 	urls := make(map[string]bool, 0)
 	for _, endpoint := range second {
 		urls[endpoint.APIEndpoint.String()] = true

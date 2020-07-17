@@ -27,6 +27,13 @@ const windowStateKeeper = require('electron-window-state');
 //   escapeRegExp
 // } = require('lodash');
 
+// Auto-update - won't work without signed developer account
+// require('update-electron-app')({
+//   repo: 'nwmac/stratos-desktop',
+//   updateInterval: '5 minutes',
+//   //logger: require('electron-log')
+// })
+
 //const LOG_FILE = '/Users/nwm/stratos.log';
 const icon = path.join(__dirname, '/icon.png');
 
@@ -137,10 +144,15 @@ function doCreateWindow(url) {
   // Open the DevTools.
   //mainWindow.webContents.openDevTools({mode:'undocked'});
 
-  // Watch for the helm repository file to change
-  const watcher = chokidar.watch(getHelmRepoFolder());
-  watcher.on('all', () => {
-    mainWindow.webContents.send('endpointsChanged', 'HELM');
+  // Watch for changed in ant of the local configuration files
+  // We will reload endpoints when these change
+  const watcher = chokidar.watch([
+    getCFConfigFile(),
+    getKubeConfigFile(),
+    getHelmRepoFolder()
+  ]);
+  watcher.on('all', (action, filePath) => {
+    mainWindow.webContents.send('endpointsChanged', action, filePath);
   });
 }
 
@@ -225,4 +237,12 @@ function getHelmRepoFolder() {
     return path.join(homeDir, 'Library', 'Preferences', 'helm');
   }
   return path.join(homeDir, '.config', 'helm');
+}
+
+function getCFConfigFile() {
+  return path.join(homeDir, '.cf', 'config.json');
+}
+
+function getKubeConfigFile() {
+  return process.env.KUBECONFIG || path.join(homeDir, '.kube', 'config');
 }
