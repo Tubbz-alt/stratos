@@ -3,7 +3,7 @@ const path = require('path');
 const fs = require('fs');
 const homeDir = require('os').homedir();
 
-class Store {
+class ElectronStore {
   constructor(opts) {
     // Renderer process has to get `app` module via `remote`, whereas the main process can get it directly
     // app.getPath('userData') will return a string of the user's app data directory path.
@@ -45,4 +45,4 @@ function parseDataFile(filePath, defaults) {
 }
 
 // expose the class
-module.exports = Store;
+module.exports = ElectronStore;
