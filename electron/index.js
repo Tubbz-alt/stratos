@@ -137,7 +137,7 @@ function doCreateWindow(url) {
 
   // Load the UI from the dev version beign served by `ng serve`
   if (isDev()) {
-    url = '127.0.0.1:4500'
+    url = '127.0.0.1:4200'
   }
   url = `https://${url}`
   url = addPath(url);
