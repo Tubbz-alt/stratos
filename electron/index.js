@@ -140,12 +140,11 @@ function doCreateWindow(url) {
     url = '127.0.0.1:4200'
   }
   url = `https://${url}`
-  url = addPath(url);
 
   const menu = Menu.buildFromTemplate(mainMenu(mainWindow, url));
   Menu.setApplicationMenu(menu)
 
-  mainWindow.loadURL(url);
+  mainWindow.loadURL(addPath(url));
 
   ipcMain.on(ELECTRON_NOTIFICATION, (event, args) => {
     new Notification({
