@@ -22,9 +22,10 @@ function addCustomizations() {
     cat "${STRATOS_FOLDER}/deploy/kubernetes/custom/imagelist.txt" >> ./imagelist.txt
 
     # Update version number
-    VERSION=$(grep -Po 'consoleVersion: \K(.*)' ./values.yaml)
+    # Works on linux and Mac
+    VERSION=$(grep -Ei 'consoleVersion: (.*)' ./values.yaml | grep -oEi '[0-9TZ\.]+-?[a-z0-9]*')
     echo "Image Version: ${VERSION}"
-    sed -i 's/_VERSION_/'"${VERSION}"'/g' imagelist.txt
+    sed -i.bak 's/_VERSION_/'"${VERSION}"'/g' imagelist.txt
   fi
 }
 
