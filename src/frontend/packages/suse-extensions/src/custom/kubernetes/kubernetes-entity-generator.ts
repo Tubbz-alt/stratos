@@ -480,5 +480,18 @@ function generateKubeResourceEntities(endpointDefinition: StratosEndpointExtensi
     kubeCatalogEntity: 'role'
   });
 
+  entities.add<KubeAPIResource>({
+    type: 'kubernetesCRD',
+    icon: 'extension',
+    iconFont: 'material-icons',
+    label: 'Custom Resource Definitions',
+    labelTab: 'CRDs',
+    apiVersion: '/apis/apiextensions.k8s.io/v1',
+    apiName: 'customresourcedefinitions',
+    apiNamespaced: false,
+    kubeCatalogEntity: 'customresourcedefinitions'
+  });
+
+
   return entities.entities;
 }
