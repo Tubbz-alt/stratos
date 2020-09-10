@@ -8,7 +8,6 @@ import {
   KubernetesStatefulSet,
   KubeService,
 } from './kube.types';
-import { KubeDashboardStatus } from './kubernetes.effects';
 
 const deliminate = (...args: string[]) => args.join('_:_');
 
@@ -19,9 +18,36 @@ const debugMissingKubeId = (entity: BasicKubeAPIResource, func: (...args: string
   return func(...args);
 }
 
+
+export const getGuidForResource = (kubeGuid: string, name: string): string => deliminate(name, kubeGuid);
+export const getGuidForNamespacedResource = (kubeGuid: string, namespace: string, name: string): string =>
+  deliminate(name, namespace, kubeGuid);
+
+/**
+ * Get the ID for a Kubernetes Resource
+ */
+export const getGuidFromResource = (entity: BasicKubeAPIResource): string => {
+
+  // Resource with namespace
+  if (entity.metadata.namespace) {
+    return deliminate(entity.metadata.kubeId, entity.metadata.namespace, entity.metadata.name)
+  }
+
+  // Named resource (no namespace)
+  if (entity.metadata.name) {
+    return deliminate(entity.metadata.kubeId, entity.metadata.name);
+  }
+
+  // Cluster-level resource (e.g. Kubernetes dashboard)
+  return entity.metadata.kubeId;
+}
+
+// ======================================================================================================================================
+// LEGACY - Remove those not needed
+// ======================================================================================================================================
+
 export const getGuidFromKubeNode = (kubeGuid: string, name: string): string => deliminate(name, kubeGuid)
-export const getGuidFromKubeNodeObj = (entity: KubernetesNode): string =>
-  debugMissingKubeId(entity, getGuidFromKubeNode, entity.metadata.kubeId, entity.metadata.name);
+export const getGuidFromKubeNodeObj = (entity: KubernetesNode): string => getGuidFromResource(entity);
 
 export const getGuidFromKubeNamespace = (kubeGuid: string, name: string): string => deliminate(name, kubeGuid)
 export const getGuidFromKubeNamespaceObj = (entity: KubernetesNamespace): string =>
@@ -44,6 +70,3 @@ export const getGuidFromKubeDeploymentObj = (entity: KubernetesDeployment): stri
 export const getGuidFromKubePod = (kubeGuid: string, namespace: string, name: string): string => deliminate(name, namespace, kubeGuid);
 export const getGuidFromKubePodObj = (entity: KubernetesPod): string =>
   debugMissingKubeId(entity, getGuidFromKubePod, entity.metadata.kubeId, entity.metadata.namespace, entity.metadata.name);
-
-export const getGuidFromKubeDashboard = (kubeGuid: string): string => kubeGuid
-export const getGuidFromKubeDashboardObj = (entity: KubeDashboardStatus): string => getGuidFromKubeDashboard(entity.kubeGuid);

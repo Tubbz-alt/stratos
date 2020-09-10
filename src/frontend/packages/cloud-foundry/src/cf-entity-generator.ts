@@ -1231,7 +1231,7 @@ function generateCfOrgEntity(endpointDefinition: StratosEndpointExtensionDefinit
     labelPlural: 'Organizations',
     endpoint: endpointDefinition,
     icon: 'organization',
-    iconFont: 'stratos-icons'    
+    iconFont: 'stratos-icons'
   };
   cfEntityCatalog.org = new StratosCatalogEntity<
     IOrgFavMetadata,
