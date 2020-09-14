@@ -53,6 +53,8 @@ import {
   kubeNamespaceActionBuilders,
   KubeNodeActionBuilders,
   kubeNodeActionBuilders,
+  KubePodActionBuilders,
+  kubePodActionBuilders,
   KubeServiceActionBuilders,
   kubeServiceActionBuilders,
   KubeStatefulSetsActionBuilders,
@@ -157,11 +159,14 @@ class KubeResourceEntityHelper {
       labelPlural: defn.labelPlural || `${defn.label}s`
     }
 
-    kubeEntityCatalog[defn.kubeCatalogEntity] = new StratosCatalogEntity<IFavoriteMetadata, T, KubeResourceActionBuilders>(d, {
-      actionBuilders: createKubeResourceActionBuilder(d.type)
-    });
+    // Only add to the catalog if not already there
+    if(!kubeEntityCatalog[defn.kubeCatalogEntity]) {
+      kubeEntityCatalog[defn.kubeCatalogEntity] = new StratosCatalogEntity<IFavoriteMetadata, T, KubeResourceActionBuilders>(d, {
+        actionBuilders: createKubeResourceActionBuilder(d.type)
+      });
+      this.entities.push(kubeEntityCatalog[defn.kubeCatalogEntity]);
+    }
 
-    this.entities.push(kubeEntityCatalog[defn.kubeCatalogEntity]);
     return this;
   }
 }
@@ -230,6 +235,7 @@ export function generateKubernetesEntities(): StratosBaseCatalogEntity[] {
   return [
     generateEndpointEntity(endpointDefinition),
     generateStatefulSetsEntity(endpointDefinition),
+    generatePodsEntity(endpointDefinition),
     ...generateKubeResourceEntities(endpointDefinition),
     generateDeploymentsEntity(endpointDefinition),
     generateNodesEntity(endpointDefinition),
@@ -261,6 +267,18 @@ function generateStatefulSetsEntity(endpointDefinition: StratosEndpointExtension
     actionBuilders: kubeStatefulSetsActionBuilders
   });
   return kubeEntityCatalog.statefulSet;
+}
+
+function generatePodsEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
+  const definition: IStratosEntityDefinition = {
+    type: kubernetesPodsEntityType,
+    schema: kubernetesEntityFactory(kubernetesPodsEntityType),
+    endpoint: endpointDefinition
+  };
+  kubeEntityCatalog.pod = new StratosCatalogEntity<IFavoriteMetadata, KubernetesPod, KubePodActionBuilders>(definition, {
+    actionBuilders: kubePodActionBuilders
+  });
+  return kubeEntityCatalog.pod;
 }
 
 function generateDeploymentsEntity(endpointDefinition: StratosEndpointExtensionDefinition) {

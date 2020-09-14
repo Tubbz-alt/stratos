@@ -1,10 +1,10 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { KubernetesNodePodsComponent } from './kubernetes-node-pods.component';
 import { BaseKubeGuid } from '../../kubernetes-page.types';
-import { KubernetesNodeService } from '../../services/kubernetes-node.service';
-import { KubernetesEndpointService } from '../../services/kubernetes-endpoint.service';
 import { KubernetesBaseTestModules } from '../../kubernetes.testing.module';
+import { KubernetesEndpointService } from '../../services/kubernetes-endpoint.service';
+import { KubernetesNodeService } from '../../services/kubernetes-node.service';
+import { KubernetesNodePodsComponent } from './kubernetes-node-pods.component';
 
 describe('KubernetesNodePodsComponent', () => {
   let component: KubernetesNodePodsComponent;
@@ -13,7 +13,9 @@ describe('KubernetesNodePodsComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [KubernetesNodePodsComponent],
-      imports: KubernetesBaseTestModules,
+      imports: [
+        ...KubernetesBaseTestModules,
+      ],
       providers: [BaseKubeGuid, KubernetesEndpointService, KubernetesNodeService]
     })
       .compileComponents();

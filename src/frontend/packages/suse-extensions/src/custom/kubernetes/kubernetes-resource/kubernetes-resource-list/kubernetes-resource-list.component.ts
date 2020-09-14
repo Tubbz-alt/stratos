@@ -18,8 +18,6 @@ export class KubernetesResourceListComponent {
 
   public entityCatalogKey: string;
 
-  // public listConfig: any;
-
   constructor(route: ActivatedRoute, router: Router) {
     // Entity Catalog Key can be specified in the route config
     this.entityCatalogKey = route.snapshot.data.entityCatalogKey;
@@ -28,12 +26,5 @@ export class KubernetesResourceListComponent {
       const routeParts = router.url.split('/');
       this.entityCatalogKey = routeParts[routeParts.length - 1];
       }
-
-//      const catalog = kubeEntityCatalog[this.entityCatalogKey];
-
-    // Set list config
-
-    // store: Store<AppState>,
-    // kubeId: BaseKubeGuid,
   }
 }

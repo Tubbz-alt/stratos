@@ -14,7 +14,6 @@ import {
 import { ITableColumn } from '../../../../../../core/src/shared/components/list/list-table/table.types';
 import { IListConfig, ListViewTypes } from '../../../../../../core/src/shared/components/list/list.component.types';
 import { AppState } from '../../../../../../store/src/app-state';
-import { kubeEntityCatalog } from '../../kubernetes-entity-catalog';
 import { BaseKubeGuid } from '../../kubernetes-page.types';
 import {
   KubernetesResourceViewerComponent,
@@ -23,6 +22,7 @@ import {
 import { defaultHelmKubeListPageSize } from '../../list-types/kube-helm-list-types';
 import { createKubeAgeColumn } from '../../list-types/kube-list.helper';
 import { KubernetesNamespaceService } from '../../services/kubernetes-namespace.service';
+import { kubeEntityCatalog } from './../../kubernetes-entity-catalog';
 import { KubeAPIResource, SimpleKubeListColumn } from './../../store/kube.types';
 
 
@@ -132,7 +132,6 @@ export class KubernetesResourceListConfigService extends KubernetesBaseResourceL
       const routeParts = router.url.split('/');
       entityCatalogKey = routeParts[routeParts.length - 1];
     }
-
     this.catalogEntity = kubeEntityCatalog[entityCatalogKey];
 
     let action;
@@ -161,7 +160,6 @@ export class KubernetesResourceListConfigService extends KubernetesBaseResourceL
 
     this.columns.push(createKubeAgeColumn());
   }
-
 
   private simpleCellToTableCell(cell: SimpleKubeListColumn): ITableColumn<KubeAPIResource> {
 
