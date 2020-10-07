@@ -1,6 +1,4 @@
-title: SUSE Stratos Console
-productVersion: 2.0.0
 packages:
   exclude: [
-    '@stratosui/desktop-extensions'
+    '@susestratos/theme',
   ]
