@@ -95,6 +95,8 @@ src/jetstream/console-database.db
 src/jetstream/config.properties
 src/jetstream/db/dbconf.yml
 src/jetstream/plugins/monocular/chart-repo/chartrepo
+src/jetstream/plugins/analysis/container/analyzers
+src/jetstream/.helm-cache
 
 # Customisations - these can be removed in the future
 # Left in for now to prevent these files being checked-in, if they are still present
@@ -128,3 +130,11 @@ go-vendor-*.tgz
 /electron/out
 /electron/dev-ssl
 /electron/jetstream
+
+website/build
+website/site-dist
+website/.docusaurus
+website/versioned_docs
+website/versioned_sidebars
+website/versions.json
+website/versions-repo

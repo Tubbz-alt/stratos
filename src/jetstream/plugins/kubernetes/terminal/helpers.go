@@ -22,6 +22,12 @@ import (
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 )
 
+const (
+	helmEndpointType        = "helm"
+	helmRepoEndpointType    = "repo"
+	startingProgressMessage = "Waiting for Kubernetes Terminal to start up ..."
+)
+
 // PodCreationData stores the clients and names used to create pod and secret
 type PodCreationData struct {
 	Namespace    string
@@ -82,6 +88,8 @@ func (k *KubeTerminal) createPod(c echo.Context, kubeConfig, kubeVersion string,
 		Type: "Opaque",
 	}
 
+	sendProgressMessage(ws, startingProgressMessage)
+
 	setResourcMetadata(&secretSpec.ObjectMeta, sessionID)
 
 	secretSpec.Data = make(map[string][]byte)
@@ -93,6 +101,7 @@ func (k *KubeTerminal) createPod(c echo.Context, kubeConfig, kubeVersion string,
 		secretSpec.Data["helm-setup"] = []byte(helmSetup)
 	}
 
+	sendProgressMessage(ws, startingProgressMessage)
 	_, err = secretClient.Create(secretSpec)
 	if err != nil {
 		log.Warnf("Kubernetes Terminal: Unable to create Secret: %+v", err)
@@ -123,7 +132,7 @@ func (k *KubeTerminal) createPod(c echo.Context, kubeConfig, kubeVersion string,
 	podSpec.Spec.EnableServiceLinks = &off
 	podSpec.Spec.RestartPolicy = "Never"
 	podSpec.Spec.DNSPolicy = "Default"
-	
+
 	volumeMountsSpec := make([]v1.VolumeMount, 1)
 	volumeMountsSpec[0].Name = "kubeconfig"
 	volumeMountsSpec[0].MountPath = "/home/stratos/.stratos"
@@ -139,7 +148,7 @@ func (k *KubeTerminal) createPod(c echo.Context, kubeConfig, kubeVersion string,
 	containerSpec[0].Env = make([]v1.EnvVar, 1)
 	containerSpec[0].Env[0].Name = "K8S_VERSION"
 	containerSpec[0].Env[0].Value = kubeVersion
-	
+
 	podSpec.Spec.Containers = containerSpec
 
 	volumesSpec := make([]v1.Volume, 1)
@@ -148,6 +157,8 @@ func (k *KubeTerminal) createPod(c echo.Context, kubeConfig, kubeVersion string,
 		SecretName: secretName,
 	}
 	podSpec.Spec.Volumes = volumesSpec
+
+	sendProgressMessage(ws, startingProgressMessage)
 
 	// Create a new pod
 	pod, err := podClient.Create(podSpec)
@@ -160,15 +171,15 @@ func (k *KubeTerminal) createPod(c echo.Context, kubeConfig, kubeVersion string,
 	result.PodClient = podClient
 	result.PodName = podName
 
-	sendProgressMessage(ws, "Waiting for Kubernetes Terminal to start up ...")
-
 	// Wait for the pod to be running
 	timeout := 60
 	statusOptions := metav1.GetOptions{}
 	for {
+		// This ensures we keep the web socket alive while the container is creating
+		sendProgressMessage(ws, startingProgressMessage)
 		status, err := podClient.Get(pod.Name, statusOptions)
 		if err == nil && status.Status.Phase == "Running" {
-			break;
+			break
 		}
 
 		timeout = timeout - 1
@@ -196,6 +207,11 @@ func setResourcMetadata(metadata *metav1.ObjectMeta, sessionID string) {
 
 // Cleanup the pod and secret
 func (k *KubeTerminal) cleanupPodAndSecret(podData *PodCreationData) error {
+	if podData == nil {
+		// Already been cleaned up
+		return nil
+	}
+
 	if len(podData.PodName) > 0 {
 		//captureBashHistory(podData)
 		podData.PodClient.Delete(podData.PodName, nil)
@@ -219,8 +235,10 @@ func getHelmRepoSetupScript(portalProxy interfaces.PortalProxy) string {
 	}
 
 	for _, ep := range endpoints {
-		if ep.CNSIType == "helm" {
-			str += fmt.Sprintf("helm repo add %s %s > /dev/null\n", ep.Name, ep.APIEndpoint)
+		if ep.CNSIType == helmEndpointType && ep.SubType == helmRepoEndpointType {
+			// Remove spaces from the name
+			name := strings.ReplaceAll(ep.Name, " ", "_")
+			str += fmt.Sprintf("helm repo add %s %s > /dev/null\n", name, ep.APIEndpoint)
 		}
 	}
 
@@ -252,7 +270,7 @@ func (k *KubeTerminal) getKubeVersion(endpointID, userID string) (string, error)
 		// Get the version number - remove any 'v' perfix or '+' suffix
 		version := nodes.Items[0].Status.NodeInfo.KubeletVersion
 		reg, err := regexp.Compile("[^0-9\\.]+")
-    if err == nil {
+		if err == nil {
 			version = reg.ReplaceAllString(version, "")
 		}
 		parts := strings.Split(version, ".")

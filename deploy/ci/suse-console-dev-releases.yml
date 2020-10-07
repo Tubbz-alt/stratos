@@ -14,8 +14,8 @@ resources:
     uri: git@github.com:((stratos-repository-organization))/((stratos-repository))
     branch: ((stratos-repository-branch))
     private_key: ((github-private-key))
-    # Match any Version 3 release (alpha, beta, rc) other than the actual release
-    tag_filter: "3*-*"
+    # Match any Version 4 release (alpha, beta, rc) other than the actual release
+    tag_filter: "4*-*"
 - name: helm-repo
   type: git
   source:
@@ -47,31 +47,19 @@ resources:
     username: ((docker-username))
     password: ((docker-password))
     repository: ((docker-repository))/stratos-console
-- name: fdbserver-image
-  type: docker-image
-  source:
-    username: ((docker-username))
-    password: ((docker-password))
-    repository: ((docker-repository))/stratos-fdbserver
-- name: fdbdoclayer-image
-  type: docker-image
-  source:
-    username: ((docker-username))
-    password: ((docker-password))
-    repository: ((docker-repository))/stratos-fdbdoclayer
-- name: chartsync-image
-  type: docker-image
-  source:
-    username: ((docker-username))
-    password: ((docker-password))
-    repository: ((docker-repository))/stratos-chartsync
 - name: kube-terminal-image
-    type: docker-image
-    source:
-      username: ((docker-username))
-      password: ((docker-password))
-      repository: ((docker-repository))/stratos-kube-terminal
-  
+  type: docker-image
+  source:
+    username: ((docker-username))
+    password: ((docker-password))
+    repository: ((docker-repository))/stratos-kube-terminal
+- name: analyzers-image
+  type: docker-image
+  source:
+    username: ((docker-username))
+    password: ((docker-password))
+    repository: ((docker-repository))/stratos-analyzers
+    
 # Artifacts
 - name: image-tag
   type: s3
@@ -126,6 +114,7 @@ jobs:
         GIT_USER: ((concourse-user))
         GIT_EMAIL: ((concourse-email))
         GIT_PRIVATE_KEY: ((github-private-key))
+        TAG_SUFFIX: ((tag-suffix))
 - name: build-images
   plan:
   - get: stratos
@@ -153,13 +142,6 @@ jobs:
           tag: image-tag/v2-alpha-tag
           patch_base_reg: ((patch-base-reg))
           patch_base_tag: ((patch-base-tag))
-      - put: kube-terminal-image
-        params:
-          dockerfile: stratos/deploy/containers/kube-terminal/Dockerfile.kubeterminal
-          build: stratos/deploy/containers/kube-terminal
-          tag: image-tag/v2-alpha-tag
-          patch_base_reg: ((patch-base-reg))
-          patch_base_tag: ((patch-base-tag))
     - do: 
       - put: ui-image
         params:
@@ -178,27 +160,21 @@ jobs:
           patch_base_reg: ((patch-base-reg))
           patch_base_tag: ((patch-base-tag))
     - do:
-      - put: fdbserver-image
+      - put: analyzers-image
         params:
-          dockerfile: stratos/deploy/containers/monocular/fdb-server/Dockerfile
-          build: stratos/deploy/containers/monocular/fdb-server/
+          dockerfile: stratos/src/jetstream/plugins/analysis/container/Dockerfile
+          build: stratos/src/jetstream/plugins/analysis/container/
           tag: image-tag/v2-alpha-tag
           patch_base_reg: ((patch-base-reg))
           patch_base_tag: ((patch-base-tag))
-      - put: fdbdoclayer-image
+      - put: kube-terminal-image
         params:
-          dockerfile: stratos/deploy/containers/monocular/fdb-doclayer/Dockerfile
-          build: stratos/deploy/containers/monocular/fdb-doclayer/
+          dockerfile: stratos/deploy/containers/kube-terminal/Dockerfile.kubeterminal
+          build: stratos/deploy/containers/kube-terminal
           tag: image-tag/v2-alpha-tag
           patch_base_reg: ((patch-base-reg))
           patch_base_tag: ((patch-base-tag))
-      - put: chartsync-image
-        params:
-          dockerfile: stratos/src/jetstream/plugins/monocular/chart-repo/Dockerfile
-          build: stratos/src/jetstream/plugins/monocular/chart-repo/
-          tag: image-tag/v2-alpha-tag
-          patch_base_reg: ((patch-base-reg))
-          patch_base_tag: ((patch-base-tag))
+
 - name: create-chart
   plan:
   - get: stratos
@@ -224,6 +200,7 @@ jobs:
         DOCKER_REGISTRY: ((docker-registry))
         HELM_REPO_PATH: ((helm-repo-path))
         HELM_REPO_BRANCH: ((helm-repo-branch))
+        TAG_SUFFIX: ((tag-suffix))
     - put: helm-chart-tarball
       params:
        file: helm-chart/*.tgz
@@ -251,3 +228,4 @@ jobs:
         GIT_USER: ((concourse-user))
         GIT_EMAIL: ((concourse-email))
         GIT_PRIVATE_KEY: ((github-private-key))
+        TAG_SUFFIX: ((tag-suffix))

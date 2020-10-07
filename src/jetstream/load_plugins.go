@@ -7,6 +7,7 @@ import (
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/cfappssh"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/cloudfoundry"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/cloudfoundryhosting"
+	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/analysis"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/kubernetes"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/desktop"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/metrics"
@@ -14,6 +15,7 @@ import (
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/userfavorites"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/userinfo"
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/plugins/userinvite"
+
 	"github.com/cloudfoundry-incubator/stratos/src/jetstream/repository/interfaces"
 	log "github.com/sirupsen/logrus"
 )
@@ -40,6 +42,7 @@ func (pp *portalProxy) loadPlugins() {
 		{"monocular", monocular.Init},
 		{"userfavorites", userfavorites.Init},
 		{"autoscaler", autoscaler.Init},
+		{"analysis", analysis.Init},
 		{"backup", backup.Init},
 		{"desktop", desktop.Init},
 	} {

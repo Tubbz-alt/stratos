@@ -1,4 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
+
 import { ITileConfig } from '../tile/tile-selector.types';
 
 
@@ -11,7 +12,11 @@ export class TileSelectorComponent {
   public pOptions: ITileConfig[] = [];
   public hiddenOptions: ITileConfig[] = [];
   public showingMore = false;
+  @Input() smallerTiles = false;
   @Input() set options(options: ITileConfig[]) {
+    if (!options) {
+      return;
+    }
     const groupedOptions = options.reduce((grouped, option) => {
       if (option.hidden) {
         grouped.hidden.push(option);
@@ -20,9 +25,9 @@ export class TileSelectorComponent {
       }
       return grouped;
     }, {
-        show: [],
-        hidden: []
-      });
+      show: [],
+      hidden: []
+    });
     this.pOptions = groupedOptions.show;
     this.hiddenOptions = groupedOptions.hidden;
   }

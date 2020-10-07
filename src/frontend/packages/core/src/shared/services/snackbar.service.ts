@@ -33,12 +33,17 @@ export class SnackBarService {
     }
   }
 
-  public showReturn(message: string, returnUrl: string, returnLabel: string) {
+  public showReturn(message: string, returnUrl: string | string[], returnLabel: string) {
     if (this.electronService.isElectronApp) {
       this.show(message);
     } else {
       this.snackBars.push(this.snackBar.openFromComponent(SnackBarReturnComponent, {
-        data: { message, returnUrl, returnLabel }
+      duration,
+      data: {
+        message,
+        returnUrl,
+        returnLabel,
+      }
       }));
     }
   }

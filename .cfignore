@@ -21,3 +21,5 @@ deploy/uaa/
 docs/
 build/dev_config.json
 e2e-reports/
+website/
+.helm-cache/

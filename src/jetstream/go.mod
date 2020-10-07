@@ -35,13 +35,17 @@ require (
 	github.com/elazarl/goproxy/ext v0.0.0-20200315184450-1f3cb6622dad // indirect
 	github.com/fatih/color v1.7.0 // indirect
 	github.com/go-sql-driver/mysql v1.5.0
+	github.com/golang/mock v1.2.0
+	github.com/golang/snappy v0.0.1 // indirect
 	github.com/google/go-querystring v1.0.0 // indirect
+	github.com/google/martian v2.1.0+incompatible
 	github.com/gopherjs/gopherjs v0.0.0-20190411002643-bd77b112433e // indirect
 	github.com/gorilla/context v1.1.1
 	github.com/gorilla/securecookie v1.1.1
 	github.com/gorilla/sessions v1.1.3
 	github.com/gorilla/websocket v1.4.2
 	github.com/govau/cf-common v0.0.7
+	github.com/helm/monocular v1.10.0 // indirect
 	github.com/jessevdk/go-flags v1.4.0 // indirect
 	github.com/jtolds/gls v4.20.0+incompatible // indirect
 	github.com/kat-co/vala v0.0.0-20170210184112-42e1d8b61f12
@@ -73,12 +77,13 @@ require (
 	github.com/valyala/fasttemplate v1.1.0 // indirect
 	github.com/vito/go-interact v0.0.0-20171111012221-fa338ed9e9ec // indirect
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
-	golang.org/x/crypto v0.0.0-20191205161847-0a08dada0ff9
+	golang.org/x/crypto v0.0.0-20200820211705-5c72a883971a
 	google.golang.org/genproto v0.0.0-20200620020550-bd6e04640131 // indirect
 	gopkg.in/DATA-DOG/go-sqlmock.v1 v1.3.0
 	gopkg.in/cheggaaa/pb.v1 v1.0.27 // indirect
-	gopkg.in/yaml.v2 v2.2.8
+	gopkg.in/yaml.v2 v2.3.0
 	k8s.io/apiextensions-apiserver v0.0.0 // indirect
+	k8s.io/helm v2.16.10+incompatible // indirect
 	k8s.io/kubectl v0.0.0 // indirect
 )
 
@@ -90,8 +95,6 @@ replace (
 	github.com/SermoDigital/jose => github.com/SermoDigital/jose v0.9.2-0.20180104203859-803625baeddc
 	github.com/Sirupsen/logrus => github.com/sirupsen/logrus v1.4.1
 	github.com/docker/docker => github.com/moby/moby v0.7.3-0.20190826074503-38ab9da00309
-	github.com/helm/monocular/chartrepo => ./plugins/monocular/chart-repo
-	github.com/helm/monocular/chartsvc => ./plugins/monocular/chartsvc
 	github.com/kubernetes-sigs/aws-iam-authenticator => github.com/kubernetes-sigs/aws-iam-authenticator v0.3.1-0.20190111160901-390d9087a4bc
 	github.com/russross/blackfriday v2.0.0+incompatible => github.com/russross/blackfriday v1.5.2
 	github.com/sergi/go-diff => github.com/sergi/go-diff v1.0.0
