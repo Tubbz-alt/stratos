@@ -19,3 +19,7 @@ You can also run the UI with `ng serve` from the top-level folder and then start
 `./run.sh dev`
 
 to load the UI from `https://127.0.0.1:4200`
+
+## Building DMG
+
+`npm run make`

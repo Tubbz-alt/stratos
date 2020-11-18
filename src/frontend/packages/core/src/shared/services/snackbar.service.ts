@@ -33,7 +33,7 @@ export class SnackBarService {
     }
   }
 
-  public showReturn(message: string, returnUrl: string | string[], returnLabel: string) {
+  public showReturn(message: string, returnUrl: string | string[], returnLabel: string, duration?: number) {
     if (this.electronService.isElectronApp) {
       this.show(message);
     } else {

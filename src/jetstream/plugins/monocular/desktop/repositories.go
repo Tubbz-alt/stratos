@@ -67,6 +67,7 @@ func ListHelmRepositories() ([]*interfaces.CNSIRecord, error) {
 				GUID:                   getEndpointGUID(repo.URL),
 				Name:                   repo.Name,
 				CNSIType:               "helm",
+				SubType:                "repo",
 				APIEndpoint:            apiEndpoint,
 				AuthorizationEndpoint:  "",
 				DopplerLoggingEndpoint: "",

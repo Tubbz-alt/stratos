@@ -109,20 +109,20 @@ func (p *portalProxy) sessionMiddlewareWithConfig(config MiddlewareConfig) echo.
 
 			p.removeEmptyCookie(c)
 
-		// Don't need to verify the session for the verify API reequest
-		// This will verify itself
+			// Don't need to verify the session for the verify API reequest
+			// This will verify itself
 			// Don't log an error if we are verifying the session, as a failure is not an error
 			isVerify := strings.HasSuffix(c.Request().RequestURI, "/auth/session/verify")
 			if isVerify {
 				// Tell the frontend what the Cookie Domain is so it can check if sessions will work
 				c.Response().Header().Set(StratosDomainHeader, p.Config.CookieDomain)
-			return h(c)
-		}
+				return h(c)
+			}
 
-		userID, err := p.GetSessionValue(c, "user_id")
-		if err == nil {
-			c.Set("user_id", userID)
-			return h(c)
+			userID, err := p.GetSessionValue(c, "user_id")
+			if err == nil {
+				c.Set("user_id", userID)
+				return h(c)
 			}
 
 			// Clear any session cookie
@@ -163,7 +163,7 @@ func (p *portalProxy) xsrfMiddlewareWithConfig(config MiddlewareConfig) echo.Mid
 
 			// Only do this for mutating requests - i.e. we can ignore for GET or HEAD requests
 			if c.Request().Method == "GET" || c.Request().Method == "HEAD" {
-			p.addXSRF(c)
+				p.addXSRF(c)
 				return h(c)
 			}
 
@@ -191,6 +191,7 @@ func (p *portalProxy) xsrfMiddlewareWithConfig(config MiddlewareConfig) echo.Mid
 				"XSRF Token could not be found or does not match",
 				"XSRF Token error: %s", errMsg,
 			)
+		}
 	}
 }
 
@@ -199,7 +200,6 @@ func (p *portalProxy) addXSRF(c echo.Context) {
 	if err != nil || len(token) == 0 {
 		// Need a new token
 		p.ensureXSRFToken(c)
-		}
 	}
 }
 
