@@ -4,7 +4,6 @@ import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
 import { IHeaderBreadcrumb } from '../../../../core/src/shared/components/page-header/page-header.types';
-import { getFavoriteFromEntity } from '../../../../store/src/user-favorite-helpers';
 import { UserFavoriteManager } from '../../../../store/src/user-favorite-manager';
 import { kubernetesNamespacesEntityType } from '../kubernetes-entity-factory';
 import { BaseKubeGuid } from '../kubernetes-page.types';
@@ -59,23 +58,48 @@ export class KubernetesNamespaceComponent {
     );
 
     this.tabLinks = [
-      { link: 'pods', label: 'Pods', icon: 'pod', iconFont: 'stratos-icons' },
-      { link: 'services', label: 'Services', icon: 'service', iconFont: 'stratos-icons' },
       { link: 'analysis', label: 'Analysis', icon: 'assignment', hidden$: this.analysisService.hideAnalysis$ },
+      { link: 'services', label: 'Services', icon: 'service', iconFont: 'stratos-icons' },
     ];
+
+    this.tabLinks.push(...this.getTabsFromEntityConfig(true));
   }
 
   public favorite$ = this.kubeNamespaceService.namespace$.pipe(
     filter(app => !!app),
-    map(namespace => getFavoriteFromEntity<IFavoriteMetadata>(
+    map(namespace => this.userFavoriteManager.getFavorite<IFavoriteMetadata>(
       {
         kubeGuid: this.kubeEndpointService.baseKube.guid,
         ...namespace,
         prettyText: 'Kubernetes Namespace',
       },
       kubernetesNamespacesEntityType,
-      this.userFavoriteManager,
       KUBERNETES_ENDPOINT_TYPE
     ))
   );
+
+  private getTabsFromEntityConfig(namespaced: boolean = true) {
+    return [];
+    // const entityNames = Object.getOwnPropertyNames(kubeEntityCatalog);
+    // const tabsFromRouterConfig = [];
+
+    // // Get the tabs from the router configuration
+    // kubeEntityCatalog.allKubeEntities().forEach(catalogEntity => {
+    //   if (catalogEntity) {
+    //     const defn = catalogEntity.definition as KubeResourceEntityDefinition;
+    //     if (defn.apiNamespaced === namespaced) {
+    //       tabsFromRouterConfig.push({
+    //         link: defn.route || `resource/${key}`,
+    //         label: defn.labelTab || defn.labelPlural,
+    //         icon: defn.icon,
+    //         iconFont: defn.iconFont,
+    //       });
+    //     }
+    //   }
+    // });
+
+    // tabsFromRouterConfig.sort((a, b) => a.label.localeCompare(b.label));
+    // return tabsFromRouterConfig;
+  }
+
 }
